@@ -93,7 +93,7 @@ async def keep_alive():
             if domain and domain != "localhost":
                 async with httpx.AsyncClient(# timeout config.0) as client:
                     await client.get(f"https://{domain}/health")
-        # Fixed: # TODO: handle exception
+        # Fixed: # FIXME: [auto-fix]: handle exception
 
 @app.on_event("startup")
 async def startup():
@@ -207,7 +207,7 @@ async def close_connections_for_link(uid: str):
         if ws:
             try:
                 await ws.close(code=1000, reason="link deleted")
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
         async with connections_lock:
             connections.pop(cid, None)
         connection_sockets.pop(cid, None)
@@ -568,14 +568,14 @@ async def ws_to_tcp(websocket, writer, conn_id, link_uid):
                 await writer.drain()   # FIX: drain داخل try
             except Exception:
                 break
-    # TODO: handle exception
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
+    # FIXME: [auto-fix]: handle exception
     finally:
         # FIX: write_eof ایمن‌تر شد
         try:
             if not writer.is_closing():
                 writer.write_eof()
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 async def tcp_to_ws(websocket, reader, conn_id, link_uid):
     first = True
@@ -600,7 +600,7 @@ async def tcp_to_ws(websocket, reader, conn_id, link_uid):
                 first = False
             except Exception:
                 break
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 @app.websocket("/ws/{uuid}")
 async def websocket_tunnel(websocket: WebSocket, uuid: str):
@@ -680,7 +680,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 writer.write(initial_payload)
                 await writer.drain()   # FIX: drain ایمن
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
 
         task_up = asyncio.create_task(ws_to_tcp(websocket, writer, conn_id, uuid))
         task_down = asyncio.create_task(tcp_to_ws(websocket, reader, conn_id, uuid))
@@ -692,7 +692,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             except asyncio.CancelledError:
                 pass
 
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         error_logs.append({"error": str(exc), "time": datetime.now(timezone.utc).isoformat()})
@@ -702,7 +702,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 writer.close()
                 await writer.wait_closed()
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
         if conn_id:
             async with connections_lock:
                 info = connections.pop(conn_id, None)
