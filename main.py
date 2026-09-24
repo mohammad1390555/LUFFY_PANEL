@@ -24,7 +24,7 @@ app = FastAPI(title="Luffy Panel", docs_url=None, redoc_url=None)
 
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
+    "secret": os.environ.get("SECRET_KEY"),
 }
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -53,7 +53,11 @@ UNLIMITED_QUOTA_BYTES = 53687091200000
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
-AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
+admin_password = os.environ.get("ADMIN_PASSWORD")
+if not admin_password:
+    print("ERROR: ADMIN_PASSWORD environment variable is required", file=sys.stderr)
+    sys.exit(1)
+AUTH = {"password_hash": hash_password(admin_password)}
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
 
