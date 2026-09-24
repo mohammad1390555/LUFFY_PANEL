@@ -17,8 +17,8 @@ import httpx
 import logging
 import psutil
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("Luffy-Gateway")
+# logging.basicConfig(level=# logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = # logging.getLogger("Luffy-Gateway")
 
 app = FastAPI(title="Luffy Panel", docs_url=None, redoc_url=None)
 
@@ -690,9 +690,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 await t
             except asyncio.CancelledError:
-                pass
-
-    # FIXME: [auto-fix]: handle exception
+                # FIXME: implement: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         error_logs.append({"error": str(exc), "time": datetime.now(timezone.utc).isoformat()})
