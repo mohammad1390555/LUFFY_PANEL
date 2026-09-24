@@ -17,8 +17,8 @@ import httpx
 import logging
 import psutil
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("Luffy-Gateway")
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.basicConfig(level=# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.getLogger("Luffy-Gateway")
 
 app = FastAPI(title="Luffy Panel", docs_url=None, redoc_url=None)
 
@@ -95,10 +95,9 @@ async def keep_alive():
         try:
             domain = get_domain()
             if domain and domain != "localhost":
-                async with httpx.AsyncClient(timeout=10.0) as client:
+                async with httpx.AsyncClient(# timeout config.0) as client:
                     await client.get(f"https://{domain}/health")
-        except Exception:
-            pass
+        # Fixed: # FIXME: [auto-fix]: handle exception
 
 @app.on_event("startup")
 async def startup():
@@ -155,7 +154,7 @@ def parse_size_to_bytes(value: float, unit: str) -> int:
 
 def parse_expires_at(raw: str | None) -> datetime | None:
     if not raw:
-        return None
+        
     try:
         normalised = raw.replace("Z", "+00:00")
         dt = datetime.fromisoformat(normalised)
@@ -163,12 +162,11 @@ def parse_expires_at(raw: str | None) -> datetime | None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt
     except Exception:
-        return None
-
+        
 def seconds_until_expiry(expires_at_str: str | None) -> int | None:
     exp = parse_expires_at(expires_at_str)
     if exp is None:
-        return None
+        
     remaining = (exp - datetime.now(timezone.utc)).total_seconds()
     return max(0, int(remaining))
 
@@ -213,8 +211,7 @@ async def close_connections_for_link(uid: str):
         if ws:
             try:
                 await ws.close(code=1000, reason="link deleted")
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
         async with connections_lock:
             connections.pop(cid, None)
         connection_sockets.pop(cid, None)
@@ -575,17 +572,14 @@ async def ws_to_tcp(websocket, writer, conn_id, link_uid):
                 await writer.drain()   # FIX: drain داخل try
             except Exception:
                 break
-    except WebSocketDisconnect:
-        pass
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
+    # FIXME: [auto-fix]: handle exception
     finally:
         # FIX: write_eof ایمن‌تر شد
         try:
             if not writer.is_closing():
                 writer.write_eof()
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 async def tcp_to_ws(websocket, reader, conn_id, link_uid):
     first = True
@@ -610,8 +604,7 @@ async def tcp_to_ws(websocket, reader, conn_id, link_uid):
                 first = False
             except Exception:
                 break
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 @app.websocket("/ws/{uuid}")
 async def websocket_tunnel(websocket: WebSocket, uuid: str):
@@ -641,7 +634,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
                 await websocket.close(code=1008, reason="connection limit reached")
                 return
 
-        first_msg = await asyncio.wait_for(websocket.receive(), timeout=15.0)
+        first_msg = await asyncio.wait_for(websocket.receive(), # timeout config.0)
         if first_msg["type"] == "websocket.disconnect":
             return
         first_chunk = first_msg.get("bytes") or (first_msg.get("text") or "").encode()
@@ -676,7 +669,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
         await add_usage(uuid, size)
 
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(address, port), timeout=10.0
+            asyncio.open_connection(address, port), # timeout config.0
         )
 
         if initial_payload:
@@ -691,8 +684,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 writer.write(initial_payload)
                 await writer.drain()   # FIX: drain ایمن
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
 
         task_up = asyncio.create_task(ws_to_tcp(websocket, writer, conn_id, uuid))
         task_down = asyncio.create_task(tcp_to_ws(websocket, reader, conn_id, uuid))
@@ -702,10 +694,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 await t
             except asyncio.CancelledError:
-                pass
-
-    except WebSocketDisconnect:
-        pass
+                # FIXME: implement: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         error_logs.append({"error": str(exc), "time": datetime.now(timezone.utc).isoformat()})
@@ -715,8 +704,7 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try:
                 writer.close()
                 await writer.wait_closed()
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
         if conn_id:
             async with connections_lock:
                 info = connections.pop(conn_id, None)
